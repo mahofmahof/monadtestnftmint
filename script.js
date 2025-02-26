@@ -141,4 +141,4 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Claim hatası:", error);
         }
     });
-});
+}); // DOMContentLoaded kapanışı

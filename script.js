@@ -1,6 +1,6 @@
 // Monad Testnet ayarları
 const RPC_URL = "https://testnet-rpc.monad.xyz";
-const CHAIN_ID = "10143"; // Hex olarak 0x27af
+const CHAIN_ID = "10143"; // Hex olarak 0x279f
 const CONTRACT_ADDRESS = "0xE47B7528088a13001db162DDc3148F71C1ae88d0";
 
 // Basitleştirilmiş ABI (sadece claim fonksiyonu için)
@@ -39,14 +39,14 @@ async function switchToMonadTestnet() {
     try {
         await window.ethereum.request({
             method: "wallet_switchEthereumChain",
-            params: [{ chainId: "0x27af" }],
+            params: [{ chainId: "0x279f" }], // Doğru hex: 0x279f
         });
     } catch (switchError) {
         if (switchError.code === 4902) {
             await window.ethereum.request({
                 method: "wallet_addEthereumChain",
                 params: [{
-                    chainId: "0x27af",
+                    chainId: "0x279f", // Doğru hex: 0x279f
                     chainName: "Monad Testnet",
                     rpcUrls: [RPC_URL],
                     nativeCurrency: {
@@ -102,24 +102,4 @@ mintNFTBtn.addEventListener("click", async () => {
         
         // Claim parametreleri
         const receiver = account; // NFT'nin gönderileceği adres
-        const quantity = 1; // Kaç tane NFT claim edilecek
-        const currency = "0x0000000000000000000000000000000000000000"; // Native token (MONAD)
-        const pricePerToken = "0"; // Ücretsiz claim
-        const allowlistProof = []; // İzin listesi yoksa boş
-        const data = "0x"; // Ekstra veri yoksa boş
-
-        // Claim işlemi (ücretsiz olduğu için value yok)
-        await contract.methods.claim(
-            receiver,
-            quantity,
-            currency,
-            pricePerToken,
-            allowlistProof,
-            data
-        ).send({ from: account });
-
-        status.textContent = `Başarılı! ${quantity} NFT claim edildi!`;
-    } catch (error) {
-        status.textContent = `Hata: ${error.message}`;
-    }
-});
+        const quantity = 1; // Kaç tane NFT claim ed

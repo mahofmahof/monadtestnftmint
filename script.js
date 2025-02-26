@@ -51,7 +51,7 @@ async function switchToMonadTestnet() {
                     rpcUrls: [RPC_URL],
                     nativeCurrency: {
                         name: "Monad",
-                        symbol: "MONAD",
+                        symbol: "MON",
                         decimals: 18
                     },
                     blockExplorerUrls: ["https://testnet.monadexplorer.com"]

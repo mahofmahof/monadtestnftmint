@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         rpcUrls: [RPC_URL],
                         nativeCurrency: {
                             name: "Monad",
-                            symbol: "MON",
+                            symbol": "MON",
                             decimals: 18
                         },
                         blockExplorerUrls: ["https://testnet.monadexplorer.com"]
@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
-    // 5 NFT mint etme
+    // 5 NFT mint etme (5 ayrı tx)
     mintFiveNFTsBtn.addEventListener("click", async () => {
         if (!account || !contract) {
             status.textContent = "Hata: Önce cüzdanı bağla!";
@@ -156,43 +156,3 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         try {
-            status.textContent = "Durum: 5 NFT mint işlemi başlatılıyor...";
-            console.log("5 NFT mint işlemi başlatıldı...");
-            
-            const quantity = 5;
-
-            await contract.methods.mint(quantity).send({ from: account });
-            status.textContent = `Başarılı! ${quantity} NFT MON ile mint edildi!`;
-            await updateTotalMinted();
-        } catch (error) {
-            status.textContent = `Hata: ${error.message}`;
-            console.error("Mint hatası:", error);
-        }
-    });
-
-    // Belirli miktar mint etme
-    mintCustomBtn.addEventListener("click", async () => {
-        if (!account || !contract) {
-            status.textContent = "Hata: Önce cüzdanı bağla!";
-            return;
-        }
-
-        const quantity = parseInt(mintAmountInput.value);
-        if (isNaN(quantity) || quantity < 1) {
-            status.textContent = "Hata: Geçerli bir miktar girin!";
-            return;
-        }
-
-        try {
-            status.textContent = `Durum: ${quantity} NFT mint işlemi başlatılıyor...`;
-            console.log(`${quantity} NFT mint işlemi başlatıldı...`);
-            
-            await contract.methods.mint(quantity).send({ from: account });
-            status.textContent = `Başarılı! ${quantity} NFT MON ile mint edildi!`;
-            await updateTotalMinted();
-        } catch (error) {
-            status.textContent = `Hata: ${error.message}`;
-            console.error("Mint hatası:", error);
-        }
-    });
-});

@@ -11,8 +11,13 @@
         <h1>Monad Testnet NFT Minting</h1>
         <button id="connectWallet">Cüzdanı Bağla</button>
         <p id="walletAddress">Cüzdan: Bağlı değil</p>
-        <button id="mintNFT" disabled>NFT Mint Et</button>
-        <button id="mintFiveNFTs" disabled>5 NFT Mint Et</button> <!-- Yeni buton -->
+        <button id="mintNFT" disabled>NFT Mint Et (1)</button>
+        <button id="mintFiveNFTs" disabled>5 NFT Mint Et</button>
+        <div>
+            <input type="number" id="mintAmount" min="1" placeholder="Kaç NFT mint edilsin?" disabled>
+            <button id="mintCustom" disabled>Belirli Miktar Mint Et</button>
+        </div>
+        <p id="totalMinted">Toplam Mint Edilen: Yükleniyor...</p>
         <p id="status">Durum: Hazır</p>
     </div>
 

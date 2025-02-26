@@ -129,4 +129,102 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // Tek NFT mint etme (1 tx)
-    mintNFTBtn.addEventListener
+    mintNFTBtn.addEventListener("click", async () => {
+        if (!account || !contract) {
+            status.textContent = "Hata: Önce cüzdanı bağla!";
+            return;
+        }
+
+        try {
+            status.textContent = "Durum: Mint işlemi başlatılıyor...";
+            console.log("Mint işlemi başlatıldı...");
+            
+            const quantity = 1;
+
+            await contract.methods.mint(quantity).send({ from: account });
+            status.textContent = `Başarılı! ${quantity} NFT MON ile mint edildi!`;
+            await updateTotalMinted();
+        } catch (error) {
+            status.textContent = `Hata: ${error.message}`;
+            console.error("Mint hatası:", error);
+        }
+    });
+
+    // 5 NFT mint etme (5 ayrı tx)
+    mintFiveNFTsBtn.addEventListener("click", async () => {
+        if (!account || !contract) {
+            status.textContent = "Hata: Önce cüzdanı bağla!";
+            return;
+        }
+
+        try {
+            status.textContent = "Durum: 5 ayrı NFT mint işlemi başlatılıyor...";
+            console.log("5 ayrı NFT mint işlemi başlatıldı...");
+            
+            const total = 5;
+            for (let i = 0; i < total; i++) {
+                status.textContent = `Durum: ${i + 1}/${total} NFT mint ediliyor...`;
+                await contract.methods.mint(1).send({ from: account });
+                console.log(`${i + 1}/${total} NFT mint edildi`);
+            }
+
+            status.textContent = `Başarılı! ${total} NFT 5 ayrı tx ile MON ile mint edildi!`;
+            await updateTotalMinted();
+        } catch (error) {
+            status.textContent = `Hata: ${error.message}`;
+            console.error("Mint hatası:", error);
+        }
+    });
+
+    // 20 NFT mint etme (20 ayrı tx)
+    mintTwentyNFTsBtn.addEventListener("click", async () => {
+        if (!account || !contract) {
+            status.textContent = "Hata: Önce cüzdanı bağla!";
+            return;
+        }
+
+        try {
+            status.textContent = "Durum: 20 ayrı NFT mint işlemi başlatılıyor...";
+            console.log("20 ayrı NFT mint işlemi başlatıldı...");
+            
+            const total = 20;
+            for (let i = 0; i < total; i++) {
+                status.textContent = `Durum: ${i + 1}/${total} NFT mint ediliyor...`;
+                await contract.methods.mint(1).send({ from: account });
+                console.log(`${i + 1}/${total} NFT mint edildi`);
+            }
+
+            status.textContent = `Başarılı! ${total} NFT 20 ayrı tx ile MON ile mint edildi!`;
+            await updateTotalMinted();
+        } catch (error) {
+            status.textContent = `Hata: ${error.message}`;
+            console.error("Mint hatası:", error);
+        }
+    });
+
+    // Belirli miktar mint etme (tek tx)
+    mintCustomBtn.addEventListener("click", async () => {
+        if (!account || !contract) {
+            status.textContent = "Hata: Önce cüzdanı bağla!";
+            return;
+        }
+
+        const quantity = parseInt(mintAmountInput.value);
+        if (isNaN(quantity) || quantity < 1) {
+            status.textContent = "Hata: Geçerli bir miktar girin!";
+            return;
+        }
+
+        try {
+            status.textContent = `Durum: ${quantity} NFT mint işlemi başlatılıyor...`;
+            console.log(`${quantity} NFT mint işlemi başlatıldı...`);
+            
+            await contract.methods.mint(quantity).send({ from: account });
+            status.textContent = `Başarılı! ${quantity} NFT MON ile mint edildi!`;
+            await updateTotalMinted();
+        } catch (error) {
+            status.textContent = `Hata: ${error.message}`;
+            console.error("Mint hatası:", error);
+        }
+    });
+});

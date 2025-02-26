@@ -1,3 +1,8 @@
+// Web3 zaten CDN ile yüklendiği için global Web3'ü kullan
+let web3;
+let account;
+let contract;
+
 // Monad Testnet ayarları
 const RPC_URL = "https://testnet-rpc.monad.xyz";
 const CHAIN_ID = "10143"; // Hex olarak 0x279f
@@ -23,20 +28,17 @@ const CONTRACT_ABI = [
     }
 ];
 
-// Web3 nesnesini oluştur
-const web3 = new Web3(RPC_URL);
-let account;
-let contract;
-
-// DOM yüklendikten sonra çalışmasını sağla
+// DOM yüklendikten sonra çalış
 document.addEventListener("DOMContentLoaded", () => {
+    // Web3 nesnesini başlat
+    web3 = new Web3(RPC_URL);
+
     // DOM elemanları
     const connectWalletBtn = document.getElementById("connectWallet");
     const mintNFTBtn = document.getElementById("mintNFT");
     const walletAddress = document.getElementById("walletAddress");
     const status = document.getElementById("status");
 
-    // Butonların varlığını kontrol et
     if (!connectWalletBtn) {
         console.error("Hata: connectWallet butonu bulunamadı!");
         return;

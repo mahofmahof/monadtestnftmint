@@ -8,7 +8,7 @@ const RPC_URL = "https://testnet-rpc.monad.xyz";
 const CHAIN_ID = "10143"; // Hex olarak 0x279f
 const CONTRACT_ADDRESS = "0x88510D9c0A3dbD4924D870254ef6F378d8a76980";
 
-// Yeni kontrat için ABI
+// Kontrat için ABI
 const CONTRACT_ABI = [
     {
         "constant": false,
@@ -20,31 +20,49 @@ const CONTRACT_ABI = [
         "payable": false,
         "stateMutability": "nonpayable",
         "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "nextTokenId",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "stateMutability": "view",
+        "type": "function"
     }
 ];
 
 // DOM yüklendikten sonra çalış
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     web3 = new Web3(RPC_URL);
 
     const connectWalletBtn = document.getElementById("connectWallet");
     const mintNFTBtn = document.getElementById("mintNFT");
-    const mintFiveNFTsBtn = document.getElementById("mintFiveNFTs"); // Yeni buton
+    const mintFiveNFTsBtn = document.getElementById("mintFiveNFTs");
+    const mintCustomBtn = document.getElementById("mintCustom");
+    const mintAmountInput = document.getElementById("mintAmount");
     const walletAddress = document.getElementById("walletAddress");
+    const totalMinted = document.getElementById("totalMinted");
     const status = document.getElementById("status");
 
-    if (!connectWalletBtn) {
-        console.error("Hata: connectWallet butonu bulunamadı!");
+    if (!connectWalletBtn || !mintNFTBtn || !mintFiveNFTsBtn || !mintCustomBtn || !mintAmountInput) {
+        console.error("Hata: Bir veya daha fazla DOM elemanı bulunamadı!");
         return;
     }
-    if (!mintNFTBtn) {
-        console.error("Hata: mintNFT butonu bulunamadı!");
-        return;
+
+    // Toplam mint sayısını güncelle
+    async function updateTotalMinted() {
+        try {
+            contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+            const nextId = await contract.methods.nextTokenId().call();
+            totalMinted.textContent = `Toplam Mint Edilen: ${nextId - 1}`;
+        } catch (error) {
+            totalMinted.textContent = "Toplam Mint Edilen: Hata!";
+            console.error("Toplam mint sayısı alınamadı:", error);
+        }
     }
-    if (!mintFiveNFTsBtn) {
-        console.error("Hata: mintFiveNFTs butonu bulunamadı!");
-        return;
-    }
+
+    // Sayfa yüklendiğinde toplam mint sayısını göster
+    await updateTotalMinted();
 
     async function switchToMonadTestnet() {
         try {
@@ -93,8 +111,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
                 
                 mintNFTBtn.disabled = false;
-                mintFiveNFTsBtn.disabled = false; // Yeni buton aktif
+                mintFiveNFTsBtn.disabled = false;
+                mintCustomBtn.disabled = false;
+                mintAmountInput.disabled = false;
                 status.textContent = "Durum: Cüzdan bağlı, MON ile mint etmeye hazır!";
+                await updateTotalMinted();
             } catch (error) {
                 status.textContent = `Hata: ${error.message}`;
                 console.error("Cüzdan bağlama hatası:", error);
@@ -119,8 +140,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const quantity = 1;
 
             await contract.methods.mint(quantity).send({ from: account });
-
             status.textContent = `Başarılı! ${quantity} NFT MON ile mint edildi!`;
+            await updateTotalMinted();
         } catch (error) {
             status.textContent = `Hata: ${error.message}`;
             console.error("Mint hatası:", error);
@@ -141,8 +162,34 @@ document.addEventListener("DOMContentLoaded", () => {
             const quantity = 5;
 
             await contract.methods.mint(quantity).send({ from: account });
-
             status.textContent = `Başarılı! ${quantity} NFT MON ile mint edildi!`;
+            await updateTotalMinted();
+        } catch (error) {
+            status.textContent = `Hata: ${error.message}`;
+            console.error("Mint hatası:", error);
+        }
+    });
+
+    // Belirli miktar mint etme
+    mintCustomBtn.addEventListener("click", async () => {
+        if (!account || !contract) {
+            status.textContent = "Hata: Önce cüzdanı bağla!";
+            return;
+        }
+
+        const quantity = parseInt(mintAmountInput.value);
+        if (isNaN(quantity) || quantity < 1) {
+            status.textContent = "Hata: Geçerli bir miktar girin!";
+            return;
+        }
+
+        try {
+            status.textContent = `Durum: ${quantity} NFT mint işlemi başlatılıyor...`;
+            console.log(`${quantity} NFT mint işlemi başlatıldı...`);
+            
+            await contract.methods.mint(quantity).send({ from: account });
+            status.textContent = `Başarılı! ${quantity} NFT MON ile mint edildi!`;
+            await updateTotalMinted();
         } catch (error) {
             status.textContent = `Hata: ${error.message}`;
             console.error("Mint hatası:", error);

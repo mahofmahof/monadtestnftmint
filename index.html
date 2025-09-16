@@ -153,7 +153,7 @@
 
       async function mint(quantity) {
         try {
-          status.textContent = `Durum: ${quantity} NFT mint ediliyor...`;
+          status.textContent = `Durum: ${quantity} NFT için tx gönderiliyor...`;
           await contract.methods.mint(quantity).send({ from: account });
           status.textContent = `Başarılı! ${quantity} NFT mint edildi!`;
           await updateTotalMinted();
@@ -163,9 +163,44 @@
         }
       }
 
+      // 1 NFT (tek tx)
       mintNFTBtn.addEventListener("click", () => mint(1));
-      mintFiveNFTsBtn.addEventListener("click", async () => { for (let i=0; i<5; i++) await mint(1); });
-      mintTwentyNFTsBtn.addEventListener("click", async () => { for (let i=0; i<20; i++) await mint(1); });
+
+      // 5 NFT (5 ayrı tx)
+      mintFiveNFTsBtn.addEventListener("click", async () => {
+        const total = 5;
+        for (let i = 0; i < total; i++) {
+          status.textContent = `Durum: ${i + 1}/${total} NFT için tx gönderiliyor...`;
+          try {
+            await contract.methods.mint(1).send({ from: account });
+            console.log(`Tx ${i + 1}/${total} gönderildi.`);
+          } catch (err) {
+            console.error("Mint hatası:", err);
+            break;
+          }
+        }
+        status.textContent = `Tamamlandı: ${total} adet NFT için ${total} ayrı tx gönderildi.`;
+        await updateTotalMinted();
+      });
+
+      // 20 NFT (20 ayrı tx)
+      mintTwentyNFTsBtn.addEventListener("click", async () => {
+        const total = 20;
+        for (let i = 0; i < total; i++) {
+          status.textContent = `Durum: ${i + 1}/${total} NFT için tx gönderiliyor...`;
+          try {
+            await contract.methods.mint(1).send({ from: account });
+            console.log(`Tx ${i + 1}/${total} gönderildi.`);
+          } catch (err) {
+            console.error("Mint hatası:", err);
+            break;
+          }
+        }
+        status.textContent = `Tamamlandı: ${total} adet NFT için ${total} ayrı tx gönderildi.`;
+        await updateTotalMinted();
+      });
+
+      // Custom miktar (tek tx)
       mintCustomBtn.addEventListener("click", () => {
         const q = parseInt(mintAmountInput.value);
         if (!q || q < 1) {

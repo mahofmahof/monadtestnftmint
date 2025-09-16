@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monad Testnet NFT Mint</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+    .container {
+      text-align: center;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 400px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Monad Testnet NFT Mint</h1>
+    <button id="connectWallet">Cüzdanı Bağla</button>
+    <p id="walletAddress">Cüzdan: Bağlı değil</p>
+    <button id="mintNFT" disabled>1 NFT Mint Et</button>
+    <button id="mintFiveNFTs" disabled>5 NFT Mint Et</button>
+    <button id="mintTwentyNFTs" disabled>20 NFT Mint Et</button>
+    <div>
+      <input type="number" id="mintAmount" min="1" placeholder="Kaç NFT?" disabled>
+      <button id="mintCustom" disabled>Belirli Miktar Mint</button>
+    </div>
+    <p id="totalMinted">Toplam Mint Edilen: Yükleniyor...</p>
+    <p id="status">Durum: Hazır</p>
+  </div>
+
+  <!-- Web3 -->
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.7.4/dist/web3.min.js"></script>
+  <script>
+    let web3;
+    let account;
+    let contract;
+
+    const RPC_URL = "https://testnet-rpc.monad.xyz";
+    const CHAIN_ID = "0x279f"; // 10143
+    const CONTRACT_ADDRESS = "0x88510D9c0A3dbD4924D870254ef6F378d8a76980";
+
+    const CONTRACT_ABI = [
+      {
+        "inputs": [{"name": "quantity","type": "uint256"}],
+        "name": "mint",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "nextTokenId",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const connectWalletBtn = document.getElementById("connectWallet");
+      const mintNFTBtn = document.getElementById("mintNFT");
+      const mintFiveNFTsBtn = document.getElementById("mintFiveNFTs");
+      const mintTwentyNFTsBtn = document.getElementById("mintTwentyNFTs");
+      const mintCustomBtn = document.getElementById("mintCustom");
+      const mintAmountInput = document.getElementById("mintAmount");
+      const walletAddress = document.getElementById("walletAddress");
+      const totalMinted = document.getElementById("totalMinted");
+      const status = document.getElementById("status");
+
+      async function updateTotalMinted() {
+        try {
+          const rpcWeb3 = new Web3(RPC_URL);
+          const readContract = new rpcWeb3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+          const nextId = await readContract.methods.nextTokenId().call();
+          totalMinted.textContent = `Toplam Mint Edilen: ${nextId - 1}`;
+        } catch (e) {
+          totalMinted.textContent = "Toplam Mint Edilen: Hata!";
+          console.error(e);
+        }
+      }
+      await updateTotalMinted();
+
+      async function switchToMonadTestnet() {
+        try {
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: CHAIN_ID }],
+          });
+        } catch (e) {
+          if (e.code === 4902) {
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [{
+                chainId: CHAIN_ID,
+                chainName: "Monad Testnet",
+                rpcUrls: [RPC_URL],
+                nativeCurrency: { name: "Monad", symbol: "MON", decimals: 18 },
+                blockExplorerUrls: ["https://testnet.monadexplorer.com"]
+              }]
+            });
+          } else {
+            throw e;
+          }
+        }
+      }
+
+      connectWalletBtn.addEventListener("click", async () => {
+        if (!window.ethereum) {
+          status.textContent = "Hata: MetaMask yüklü değil!";
+          return;
+        }
+        try {
+          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+          account = accounts[0];
+          walletAddress.textContent = "Cüzdan: " + account;
+
+          await switchToMonadTestnet();
+          web3 = new Web3(window.ethereum);
+          contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+
+          [mintNFTBtn, mintFiveNFTsBtn, mintTwentyNFTsBtn, mintCustomBtn, mintAmountInput]
+            .forEach(el => el.disabled = false);
+
+          status.textContent = "Durum: Cüzdan bağlı, MON ile mint etmeye hazır!";
+          await updateTotalMinted();
+        } catch (err) {
+          status.textContent = "Hata: " + err.message;
+          console.error(err);
+        }
+      });
+
+      async function mint(quantity) {
+        try {
+          status.textContent = `Durum: ${quantity} NFT mint ediliyor...`;
+          await contract.methods.mint(quantity).send({ from: account });
+          status.textContent = `Başarılı! ${quantity} NFT mint edildi!`;
+          await updateTotalMinted();
+        } catch (err) {
+          status.textContent = "Hata: " + err.message;
+          console.error(err);
+        }
+      }
+
+      mintNFTBtn.addEventListener("click", () => mint(1));
+      mintFiveNFTsBtn.addEventListener("click", async () => { for (let i=0; i<5; i++) await mint(1); });
+      mintTwentyNFTsBtn.addEventListener("click", async () => { for (let i=0; i<20; i++) await mint(1); });
+      mintCustomBtn.addEventListener("click", () => {
+        const q = parseInt(mintAmountInput.value);
+        if (!q || q < 1) {
+          status.textContent = "Hata: Geçerli miktar gir!";
+          return;
+        }
+        mint(q);
+      });
+    });
+  </script>
+</body>
+</html>

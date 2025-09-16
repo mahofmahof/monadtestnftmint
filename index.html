@@ -40,11 +40,11 @@
     <button id="connectWallet">Cüzdanı Bağla</button>
     <p id="walletAddress">Cüzdan: Bağlı değil</p>
     <button id="mintNFT" disabled>1 NFT Mint Et</button>
-    <button id="mintFiveNFTs" disabled>5 NFT Mint Et</button>
-    <button id="mintTwentyNFTs" disabled>20 NFT Mint Et</button>
+    <button id="mintFiveNFTs" disabled>5 NFT Mint Et (5 tx)</button>
+    <button id="mintTwentyNFTs" disabled>20 NFT Mint Et (20 tx)</button>
     <div>
       <input type="number" id="mintAmount" min="1" placeholder="Kaç NFT?" disabled>
-      <button id="mintCustom" disabled>Belirli Miktar Mint</button>
+      <button id="mintCustom" disabled>Belirli Miktar Mint (tek tx)</button>
     </div>
     <p id="totalMinted">Toplam Mint Edilen: Yükleniyor...</p>
     <p id="status">Durum: Hazır</p>
@@ -151,6 +151,7 @@
         }
       });
 
+      // Tek tx mint
       async function mint(quantity) {
         try {
           status.textContent = `Durum: ${quantity} NFT için tx gönderiliyor...`;
@@ -179,7 +180,7 @@
             break;
           }
         }
-        status.textContent = `Tamamlandı: ${total} adet NFT için ${total} ayrı tx gönderildi.`;
+        status.textContent = `Tamamlandı: ${total} NFT için ${total} ayrı tx gönderildi.`;
         await updateTotalMinted();
       });
 
@@ -196,7 +197,7 @@
             break;
           }
         }
-        status.textContent = `Tamamlandı: ${total} adet NFT için ${total} ayrı tx gönderildi.`;
+        status.textContent = `Tamamlandı: ${total} NFT için ${total} ayrı tx gönderildi.`;
         await updateTotalMinted();
       });
 
